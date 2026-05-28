@@ -5,11 +5,13 @@ import { useEffect, useState } from "react"
 type Props = {
   tournamentName: string
   startTime: string
+  totalTeams?: number
 }
 
 export default function AuctionTimer({
   tournamentName,
   startTime,
+  totalTeams = 0,
 }: Props) {
 
   const [timeLeft, setTimeLeft] =
@@ -117,51 +119,169 @@ export default function AuctionTimer({
 
   return (
 
-    <div className="relative overflow-hidden rounded-[36px] border border-zinc-800 bg-zinc-900/60 backdrop-blur-xl p-8">
+    <div className="relative overflow-hidden rounded-[28px] border border-zinc-800 bg-zinc-950/95 px-5 py-6 md:px-7 md:py-7">
 
-      {/* GLOW */}
+      {/* BACKGROUND GLOW */}
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(249,115,22,0.12),transparent_35%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(249,115,22,0.12),transparent_55%)]" />
 
       <div className="relative z-10">
 
-        {/* TOURNAMENT */}
+        {/* TOP BAR */}
 
-        <p className="text-orange-400 uppercase tracking-[0.3em] text-xs font-black mb-5">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
 
-          Tournament Auction
+          {/* LEFT */}
 
-        </p>
+          <div>
 
-        <h2 className="text-4xl md:text-5xl font-black leading-tight mb-10">
+            {/* LIVE LABEL */}
 
-          {tournamentName}
+            <div className="flex items-center gap-2 mb-3">
 
-        </h2>
+              <div className="relative">
 
-        {/* TIMER */}
+                <div className="absolute inset-0 rounded-full bg-red-500 blur-md opacity-80" />
 
-        <div className="bg-black/40 border border-zinc-800 rounded-3xl px-8 py-7 inline-flex flex-col">
+                <div className="relative w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
 
-          <p className="text-zinc-500 text-sm uppercase tracking-[0.2em] mb-3 font-black">
+              </div>
 
-            {isLive
-              ? "Auction Status"
-              : "Starts In"}
+              <span className="text-[10px] uppercase tracking-[0.35em] text-red-400 font-black">
 
-          </p>
+                Live Auction Room
 
-          <p
-            className={`text-5xl md:text-6xl font-black ${
-              isLive
-                ? "text-green-400"
-                : "text-orange-400"
-            }`}
-          >
+              </span>
 
-            {timeLeft}
+            </div>
 
-          </p>
+            {/* TITLE */}
+
+            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white leading-none">
+
+              {tournamentName}
+
+            </h1>
+
+            {/* SUBTEXT */}
+
+            <div className="flex items-center gap-2 mt-3 flex-wrap">
+
+              <span className="text-zinc-500 text-xs md:text-sm font-medium">
+
+                Scotch Doubles
+
+              </span>
+
+              <div className="w-1 h-1 rounded-full bg-zinc-700" />
+
+              <span className="text-zinc-500 text-xs md:text-sm font-medium">
+
+                {totalTeams} Teams
+
+              </span>
+
+              <div className="w-1 h-1 rounded-full bg-zinc-700" />
+
+              <span className="text-orange-400 text-xs md:text-sm font-semibold">
+
+                Live Bidding
+
+              </span>
+
+            </div>
+
+            {/* NOTES */}
+
+<div className="mt-4 flex flex-wrap gap-2">
+
+  <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-black/40 px-3 py-2">
+
+    <div className="h-2 w-2 rounded-full bg-orange-500" />
+
+    <span className="text-[11px] font-bold text-zinc-300">
+
+      Bid Now
+
+    </span>
+
+  </div>
+
+  <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-black/40 px-3 py-2">
+
+    <div className="h-2 w-2 rounded-full bg-orange-500" />
+
+    <span className="text-[11px] font-bold text-zinc-300">
+
+      Set Max Bid
+
+    </span>
+
+  </div>
+
+  <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-black/40 px-3 py-2">
+
+    <div className="h-2 w-2 rounded-full bg-orange-500" />
+
+    <span className="text-[11px] font-bold text-zinc-300">
+
+      Favorites
+
+    </span>
+
+  </div>
+
+              {/* FAVORITES */}
+
+              <div className="rounded-2xl border border-zinc-800 bg-black/30 px-4 py-3">
+
+                <p className="text-orange-400 text-[10px] uppercase tracking-[0.3em] font-black mb-2">
+
+                  Favorites
+
+                </p>
+
+                <p className="text-zinc-400 text-xs leading-relaxed">
+
+                  Save teams to your watchlist so you can quickly track active bidding.
+
+                </p>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* RIGHT TIMER */}
+
+          <div className="relative overflow-hidden rounded-2xl border border-orange-500/25 bg-black/40 px-5 py-4 min-w-[180px] md:min-w-[220px]">
+
+            {/* GLOW */}
+
+            <div className="absolute inset-0 bg-orange-500/10 blur-2xl" />
+
+            <p className="relative z-10 text-[9px] uppercase tracking-[0.3em] text-zinc-500 font-black mb-1">
+
+              {isLive
+                ? "Auction Live"
+                : "Starts In"}
+
+            </p>
+
+            <div
+              className={`relative z-10 text-3xl md:text-5xl font-black tracking-tight ${
+                isLive
+                  ? "text-green-400 drop-shadow-[0_0_18px_rgba(74,222,128,0.85)]"
+                  : "text-orange-400 drop-shadow-[0_0_20px_rgba(251,146,60,0.95)]"
+              }`}
+            >
+
+              {timeLeft}
+
+            </div>
+
+          </div>
 
         </div>
 

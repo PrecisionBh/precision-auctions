@@ -7,6 +7,7 @@ import Header from "@/components/layout/Header"
 import Footer from "@/components/layout/Footer"
 
 import AuctionTimer from "@/components/auction/auctiontimer"
+import BidBoard from "@/components/auction/BidBoard"
 
 import { supabase } from "@/lib/supabase"
 
@@ -21,6 +22,9 @@ export default function LiveAuctionRoomPage() {
 
   const [auction, setAuction] =
     useState<any>(null)
+
+  const [teams, setTeams] =
+    useState<any[]>([])
 
   const [user, setUser] =
     useState<any>(null)
@@ -67,6 +71,8 @@ export default function LiveAuctionRoomPage() {
 
     try {
 
+      /* FETCH AUCTION */
+
       const {
         data,
         error,
@@ -88,6 +94,56 @@ export default function LiveAuctionRoomPage() {
       }
 
       setAuction(data)
+
+      /* FETCH TEAMS */
+
+      const {
+        data: teamsData,
+        error: teamsError,
+      } = await supabase
+        .from("tournament_teams")
+        .select("*")
+        .eq(
+          "tournament_id",
+          data.tournament_id
+        )
+        .order(
+          "display_order",
+          { ascending: true }
+        )
+
+      if (teamsError) {
+
+        console.error(
+          teamsError
+        )
+
+      }
+
+      /* MOCK BIDDING DATA */
+
+      const formattedTeams =
+        (teamsData || []).map(
+          (team) => ({
+
+            ...team,
+
+            current_bid:
+              Math.floor(
+                Math.random() * 900
+              ) + 100,
+
+            winning_bidder:
+              Math.random() > 0.5
+                ? "Big Cat"
+                : "No Bids",
+
+          })
+        )
+
+      setTeams(
+        formattedTeams
+      )
 
     } catch (err) {
 
@@ -128,38 +184,25 @@ export default function LiveAuctionRoomPage() {
 
       <Header />
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-10">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-8">
 
-        {/* TOP */}
+        {/* LIVE LABEL */}
 
-        <div className="mb-10">
+        <div className="flex items-center justify-center gap-3 mb-6">
 
-          <div className="flex items-center gap-3 mb-5">
+          <div className="relative">
 
-            <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+            <div className="absolute inset-0 rounded-full bg-red-500 blur-md opacity-80" />
 
-            <span className="text-red-400 uppercase tracking-[0.3em] text-sm font-black">
-
-              LIVE AUCTION ROOM
-
-            </span>
+            <div className="relative w-3 h-3 rounded-full bg-red-500 animate-pulse" />
 
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black leading-none">
+          <span className="text-red-400 uppercase tracking-[0.35em] text-xs font-black">
 
-            {auction.name}
+            LIVE AUCTION ROOM
 
-          </h1>
-
-          <p className="text-zinc-500 text-lg mt-6 max-w-3xl">
-
-            Real-time calcutta bidding,
-            favorites, max bids,
-            live chat,
-            and auction action.
-
-          </p>
+          </span>
 
         </div>
 
@@ -172,6 +215,15 @@ export default function LiveAuctionRoomPage() {
           startTime={
             auction.start_time
           }
+          totalTeams={
+            teams.length
+          }
+        />
+
+        {/* BID BOARD */}
+
+        <BidBoard
+          teams={teams}
         />
 
       </main>
