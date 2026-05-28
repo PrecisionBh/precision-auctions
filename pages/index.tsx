@@ -1,78 +1,123 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export default function Home() {
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black`}
-    >
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the index.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-black text-white">
+
+      <header className="border-b border-zinc-800">
+
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+
+          <div>
+            <h1 className="text-2xl font-bold tracking-wide">
+              Precision Auctions
+            </h1>
+
+            <p className="text-sm text-zinc-500">
+              Live Pool Auctions
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+
+            <button className="text-sm text-zinc-300 hover:text-white transition">
+              Watchlist
+            </button>
+
+            <button className="text-sm text-zinc-300 hover:text-white transition">
+              My Bids
+            </button>
+
+            <button className="bg-orange-500 hover:bg-orange-600 transition px-4 py-2 rounded-lg text-sm font-semibold">
+              Sell Item
+            </button>
+
+          </div>
+
+        </div>
+
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 py-10">
+
+        <div className="mb-10">
+
+          <div className="flex items-center gap-3 mb-4">
+
+            <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+
+            <span className="text-sm uppercase tracking-widest text-red-400 font-semibold">
+              Live Auctions
+            </span>
+
+          </div>
+
+          <h2 className="text-5xl font-bold leading-tight max-w-3xl">
+            The Modern Live Auction Platform For Pool Players
+          </h2>
+
+          <p className="text-zinc-400 mt-6 max-w-2xl text-lg">
+            Bid live, track auctions in real-time, build watchlists,
+            and never miss a deal again.
           </p>
+
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs/pages/getting-started?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+          {[1,2,3,4,5,6].map((item) => (
+
+            <div
+              key={item}
+              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 hover:border-orange-500 transition"
+            >
+
+              <div className="flex items-center justify-between mb-4">
+
+                <span className="text-xs uppercase tracking-wider text-orange-400 font-semibold">
+                  Ending Soon
+                </span>
+
+                <span className="text-sm text-zinc-500">
+                  02:14
+                </span>
+
+              </div>
+
+              <h3 className="text-xl font-bold mb-2">
+                Shane vs Fedor Calcutta
+              </h3>
+
+              <p className="text-zinc-400 text-sm mb-6">
+                Race to 9 • Pro Event • Finals
+              </p>
+
+              <div className="flex items-end justify-between">
+
+                <div>
+
+                  <p className="text-zinc-500 text-sm">
+                    Current Bid
+                  </p>
+
+                  <p className="text-3xl font-bold text-orange-400">
+                    $420
+                  </p>
+
+                </div>
+
+                <button className="bg-orange-500 hover:bg-orange-600 transition px-4 py-2 rounded-lg font-semibold">
+                  Bid
+                </button>
+
+              </div>
+
+            </div>
+
+          ))}
+
         </div>
+
       </main>
+
     </div>
-  );
+  )
 }
