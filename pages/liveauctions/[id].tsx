@@ -215,8 +215,9 @@ export default function LiveAuctionRoomPage() {
         {/* BID BOARD */}
 
         <BidBoard
-          teams={teams}
-        />
+  teams={teams}
+  auction={auction}
+/>
 
       </main>
 
