@@ -1,19 +1,123 @@
 "use client"
 
+import { useState } from "react"
+import { supabase } from "@/lib/supabase"
+
 type Props = {
   open: boolean
   onClose: () => void
   team: any
+  auction: any
 }
 
 export default function BidNowModal({
   open,
   onClose,
   team,
-}: Props) {
+  auction,
+}: Props){
+
+  const [bidAmount, setBidAmount] =
+    useState("")
+
+  const [loading, setLoading] =
+    useState(false)
 
   if (!open || !team)
     return null
+
+  const handlePlaceBid = async () => {
+
+    try {
+
+      setLoading(true)
+
+      const amount =
+        Number(bidAmount)
+
+      if (
+        !amount ||
+        amount <=
+          (team.current_bid || 0)
+      ) {
+
+        alert(
+          `Bid must be greater than $${team.current_bid || 0}`
+        )
+
+        return
+      }
+
+      const {
+        data: { user },
+      } =
+        await supabase.auth.getUser()
+
+      if (!user) {
+
+        alert(
+          "Please login first"
+        )
+
+        return
+      }
+
+      const { error: bidError } =
+        await supabase
+          .from("bids")
+          .insert({
+            auction_id:
+              team.auction_id,
+            team_id:
+              team.id,
+            bidder_id:
+              user.id,
+            amount,
+          })
+
+      if (bidError)
+        throw bidError
+
+      const {
+        error: teamError,
+
+        
+      } = await supabase
+        .from(
+          "tournament_teams"
+        )
+        .update({
+          current_bid: amount,
+          current_winner:
+            user.id,
+        })
+        .eq("id", team.id)
+
+      if (teamError)
+        throw teamError
+
+      setBidAmount("")
+
+      onClose()
+
+    } catch (err: any) {
+
+  console.error(
+    "BID ERROR:",
+    err
+  )
+
+  alert(
+    JSON.stringify(err)
+  )
+
+} finally {
+
+      setLoading(false)
+
+    }
+
+  }
 
   return (
 
@@ -48,6 +152,7 @@ export default function BidNowModal({
           <p className="mt-3 text-zinc-500 text-sm">
 
             Current Bid:
+
             <span className="text-orange-400 font-black ml-2">
 
               ${team.current_bid || 0}
@@ -68,6 +173,12 @@ export default function BidNowModal({
 
             <input
               type="number"
+              value={bidAmount}
+              onChange={(e) =>
+                setBidAmount(
+                  e.target.value
+                )
+              }
               placeholder="Enter bid amount"
               className="mt-2 w-full rounded-2xl border border-zinc-800 bg-black px-4 py-4 text-white outline-none focus:border-orange-500"
             />
@@ -87,9 +198,15 @@ export default function BidNowModal({
 
             </button>
 
-            <button className="flex-1 rounded-2xl bg-orange-500 py-3 font-black text-white hover:bg-orange-400 transition">
+            <button
+              onClick={handlePlaceBid}
+              disabled={loading}
+              className="flex-1 rounded-2xl bg-orange-500 py-3 font-black text-white hover:bg-orange-400 transition disabled:opacity-50"
+            >
 
-              Place Bid
+              {loading
+                ? "Placing..."
+                : "Place Bid"}
 
             </button>
 

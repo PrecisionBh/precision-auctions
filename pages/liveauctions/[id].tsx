@@ -71,8 +71,6 @@ export default function LiveAuctionRoomPage() {
 
     try {
 
-      /* FETCH AUCTION */
-
       const {
         data,
         error,
@@ -95,14 +93,17 @@ export default function LiveAuctionRoomPage() {
 
       setAuction(data)
 
-      /* FETCH TEAMS */
-
       const {
         data: teamsData,
         error: teamsError,
       } = await supabase
         .from("tournament_teams")
-        .select("*")
+.select(`
+  *,
+  winner:profiles!current_winner(
+    username
+  )
+`)
         .eq(
           "tournament_id",
           data.tournament_id
@@ -120,23 +121,14 @@ export default function LiveAuctionRoomPage() {
 
       }
 
-      /* MOCK BIDDING DATA */
-
       const formattedTeams =
         (teamsData || []).map(
           (team) => ({
 
             ...team,
 
-            current_bid:
-              Math.floor(
-                Math.random() * 900
-              ) + 100,
-
-            winning_bidder:
-              Math.random() > 0.5
-                ? "Big Cat"
-                : "No Bids",
+            auction_id:
+              data.id,
 
           })
         )
@@ -210,10 +202,10 @@ export default function LiveAuctionRoomPage() {
 
         <AuctionTimer
           tournamentName={
-            auction.name
+            auction?.name || ""
           }
           startTime={
-            auction.start_time
+            auction?.start_time || ""
           }
           totalTeams={
             teams.length

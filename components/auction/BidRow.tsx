@@ -9,11 +9,13 @@ import {
 type Props = {
   team: any
   index: number
+  onBid: (team: any) => void
 }
 
 export default function BidRow({
   team,
   index,
+  onBid,
 }: Props) {
 
   return (
@@ -82,8 +84,8 @@ export default function BidRow({
 
           <p className="text-sm font-semibold text-green-400 truncate">
 
-            {team.winning_bidder ||
-              "No Bids"}
+            {team.winner?.username ||
+  "No Bids"}
 
           </p>
 
@@ -95,7 +97,10 @@ export default function BidRow({
 
           {/* BID */}
 
-          <button className="flex items-center gap-2 rounded-xl bg-orange-500 px-3 py-2 text-xs font-black text-white transition hover:bg-orange-400">
+          <button
+            onClick={() => onBid(team)}
+            className="flex items-center gap-2 rounded-xl bg-orange-500 px-3 py-2 text-xs font-black text-white transition hover:bg-orange-400"
+          >
 
             <Gavel size={14} />
 
@@ -167,8 +172,8 @@ export default function BidRow({
 
             <p className="text-green-400 text-xs font-semibold">
 
-              {team.winning_bidder ||
-                "No Bids"}
+              {team.winner?.username ||
+  "No Bids"}
 
             </p>
 
@@ -188,7 +193,10 @@ export default function BidRow({
 
           <div className="flex items-center gap-2">
 
-            <button className="rounded-xl bg-orange-500 px-3 py-2 text-xs font-black text-white">
+            <button
+              onClick={() => onBid(team)}
+              className="rounded-xl bg-orange-500 px-3 py-2 text-xs font-black text-white"
+            >
 
               Bid
 

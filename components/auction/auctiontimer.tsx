@@ -190,68 +190,7 @@ export default function AuctionTimer({
               </span>
 
             </div>
-
-            {/* NOTES */}
-
-<div className="mt-4 flex flex-wrap gap-2">
-
-  <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-black/40 px-3 py-2">
-
-    <div className="h-2 w-2 rounded-full bg-orange-500" />
-
-    <span className="text-[11px] font-bold text-zinc-300">
-
-      Bid Now
-
-    </span>
-
-  </div>
-
-  <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-black/40 px-3 py-2">
-
-    <div className="h-2 w-2 rounded-full bg-orange-500" />
-
-    <span className="text-[11px] font-bold text-zinc-300">
-
-      Set Max Bid
-
-    </span>
-
-  </div>
-
-  <div className="inline-flex items-center gap-2 rounded-full border border-zinc-800 bg-black/40 px-3 py-2">
-
-    <div className="h-2 w-2 rounded-full bg-orange-500" />
-
-    <span className="text-[11px] font-bold text-zinc-300">
-
-      Favorites
-
-    </span>
-
-  </div>
-
-              {/* FAVORITES */}
-
-              <div className="rounded-2xl border border-zinc-800 bg-black/30 px-4 py-3">
-
-                <p className="text-orange-400 text-[10px] uppercase tracking-[0.3em] font-black mb-2">
-
-                  Favorites
-
-                </p>
-
-                <p className="text-zinc-400 text-xs leading-relaxed">
-
-                  Save teams to your watchlist so you can quickly track active bidding.
-
-                </p>
-
-              </div>
-
             </div>
-
-          </div>
 
           {/* RIGHT TIMER */}
 
