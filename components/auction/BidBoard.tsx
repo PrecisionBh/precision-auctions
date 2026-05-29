@@ -4,6 +4,7 @@ import { useState } from "react"
 
 import BidRow from "./BidRow"
 import BidNowModal from "./BidNowModal"
+import MaxBidModal from "./MaxBidModal"
 
 type Props = {
   teams: any[]
@@ -25,6 +26,11 @@ export default function BidBoard({
     setShowBidModal,
   ] = useState(false)
 
+  const [
+    showMaxBidModal,
+    setShowMaxBidModal,
+  ] = useState(false)
+
   const handleBid = (
     team: any
   ) => {
@@ -40,6 +46,21 @@ export default function BidBoard({
 
   }
 
+  const handleMaxBid = (
+    team: any
+  ) => {
+
+    console.log(
+      "MAX BID CLICKED",
+      team
+    )
+
+    setSelectedTeam(team)
+
+    setShowMaxBidModal(true)
+
+  }
+
   return (
 
     <>
@@ -48,7 +69,7 @@ export default function BidBoard({
 
         {/* DESKTOP HEADER */}
 
-        <div className="hidden md:grid grid-cols-[60px_1.6fr_120px_140px_160px_170px] items-center border-b border-zinc-800 bg-zinc-900/90 px-4 py-4 text-[11px] uppercase tracking-[0.25em] text-zinc-500 font-black">
+        <div className="hidden md:grid grid-cols-[60px_1.6fr_120px_140px_180px_120px_190px] items-center border-b border-zinc-800 bg-zinc-900/90 px-4 py-4 text-[11px] uppercase tracking-[0.25em] text-zinc-500 font-black">
 
           <div>#</div>
 
@@ -59,6 +80,8 @@ export default function BidBoard({
           <div>Current</div>
 
           <div>Winning</div>
+
+          <div>Time Left</div>
 
           <div className="text-right">
 
@@ -82,7 +105,9 @@ export default function BidBoard({
                 key={team.id}
                 team={team}
                 index={index}
+                auction={auction}
                 onBid={handleBid}
+                onMaxBid={handleMaxBid}
               />
 
             )
@@ -99,6 +124,18 @@ export default function BidBoard({
         onClose={() => {
 
           setShowBidModal(false)
+
+          setSelectedTeam(null)
+
+        }}
+      />
+
+      <MaxBidModal
+        open={showMaxBidModal}
+        team={selectedTeam}
+        onClose={() => {
+
+          setShowMaxBidModal(false)
 
           setSelectedTeam(null)
 

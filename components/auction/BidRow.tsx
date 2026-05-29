@@ -1,5 +1,12 @@
 "use client"
 
+"use client"
+
+import {
+  useEffect,
+  useState,
+} from "react"
+
 import {
   Star,
   Gavel,
@@ -9,14 +16,116 @@ import {
 type Props = {
   team: any
   index: number
+  auction: any
   onBid: (team: any) => void
+  onMaxBid: (team: any) => void
 }
 
 export default function BidRow({
   team,
   index,
+  auction,
   onBid,
+  onMaxBid,
 }: Props) {
+
+    const [
+    timeLeft,
+    setTimeLeft,
+  ] = useState("")
+
+  useEffect(() => {
+
+    const updateTimer =
+      () => {
+
+        const now =
+  Date.now()
+
+const startTime =
+  new Date(
+    auction.start_time
+  ).getTime()
+
+if (
+  now < startTime
+) {
+
+  setTimeLeft(
+    "Opening Soon"
+  )
+
+  return
+
+}
+
+const endTime =
+  team.extended_end_time ||
+  auction.end_time
+
+const difference =
+  new Date(
+    endTime
+  ).getTime() -
+  now
+
+if (
+  difference <= 0
+) {
+
+  setTimeLeft(
+    "Closed"
+  )
+
+  return
+
+}
+
+        const totalSeconds =
+  Math.floor(
+    difference / 1000
+  )
+
+const hours =
+  Math.floor(
+    totalSeconds / 3600
+  )
+
+const minutes =
+  Math.floor(
+    (
+      totalSeconds % 3600
+    ) / 60
+  )
+
+const seconds =
+  totalSeconds % 60
+
+setTimeLeft(
+  `${hours}h ${minutes}m ${seconds
+    .toString()
+    .padStart(2, "0")}s`
+)
+
+      }
+
+    updateTimer()
+
+    const interval =
+      setInterval(
+        updateTimer,
+        1000
+      )
+
+    return () =>
+      clearInterval(
+        interval
+      )
+
+  }, [
+    team.extended_end_time,
+    auction?.end_time,
+  ])
 
   return (
 
@@ -24,7 +133,7 @@ export default function BidRow({
 
       {/* DESKTOP */}
 
-      <div className="hidden md:grid grid-cols-[60px_1.6fr_120px_140px_160px_170px] items-center border-b border-zinc-900 px-4 py-4 hover:bg-zinc-900/70 transition-all duration-200">
+      <div className="hidden md:grid grid-cols-[60px_1.6fr_120px_140px_180px_120px_190px] items-center border-b border-zinc-900 px-4 py-4 hover:bg-zinc-900/70 transition-all duration-200">
 
         {/* NUMBER */}
 
@@ -80,20 +189,40 @@ export default function BidRow({
 
         {/* WINNING BIDDER */}
 
-        <div>
+<div>
 
-          <p className="text-sm font-semibold text-green-400 truncate">
+  <p className="text-sm font-semibold text-green-400 truncate">
 
-            {team.winner?.username ||
-  "No Bids"}
+    {team.winner?.username ||
+      "No Bids"}
 
-          </p>
+  </p>
 
-        </div>
+</div>
+
+{/* TIMER */}
+
+<div>
+
+  <p
+    className={`text-sm font-black ${
+  timeLeft === "Closed"
+    ? "text-red-500"
+    : timeLeft === "Opening Soon"
+    ? "text-red-500"
+    : "text-green-400"
+}`}
+  >
+
+    {timeLeft}
+
+  </p>
+
+</div>
 
         {/* ACTIONS */}
 
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-2 pr-2">
 
           {/* BID */}
 
@@ -110,8 +239,12 @@ export default function BidRow({
 
           {/* MAX */}
 
-          <button className="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-black text-zinc-300 transition hover:border-orange-500 hover:text-orange-400">
-
+          <button
+  onClick={() =>
+    onMaxBid(team)
+  }
+  className="flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-black text-zinc-300 transition hover:border-orange-500 hover:text-orange-400"
+>
             <TrendingUp size={14} />
 
             Max
@@ -202,8 +335,12 @@ export default function BidRow({
 
             </button>
 
-            <button className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-black text-zinc-300">
-
+           <button
+  onClick={() =>
+    onMaxBid(team)
+  }
+  className="rounded-xl border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-black text-zinc-300"
+>
               Max
 
             </button>
