@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { supabase } from "@/lib/supabase"
+import Toast from "@/components/toast"
 
 type Props = {
   open: boolean
@@ -21,6 +22,19 @@ export default function MaxBidModal({
   const [loading, setLoading] =
     useState(false)
 
+    const [
+  toast,
+  setToast,
+] = useState({
+  show: false,
+  type: "success" as
+    "success" |
+    "error" |
+    "warning",
+  title: "",
+  message: "",
+})
+
   if (!open || !team)
     return null
 
@@ -39,9 +53,12 @@ export default function MaxBidModal({
           amount <= 0
         ) {
 
-          alert(
-            "Enter a valid max bid."
-          )
+          setToast({
+  show: true,
+  type: "warning",
+  title: "Invalid Max Bid",
+  message: "Enter a valid max bid amount.",
+})
 
           return
 
@@ -54,9 +71,12 @@ export default function MaxBidModal({
 
         if (!user) {
 
-          alert(
-            "Please login first."
-          )
+          setToast({
+  show: true,
+  type: "warning",
+  title: "Login Required",
+  message: "Please login before setting a max bid.",
+})
 
           return
 
@@ -67,23 +87,28 @@ export default function MaxBidModal({
         } =
           await supabase
             .from("max_bids")
-            .upsert({
-              auction_id:
-                team.auction_id,
-              team_id:
-                team.id,
-              bidder_id:
-                user.id,
-              max_amount:
-                amount,
-            })
+            .upsert(
+  {
+    auction_id: team.auction_id,
+    team_id: team.id,
+    bidder_id: user.id,
+    max_amount: amount,
+  },
+  {
+    onConflict:
+      "auction_id,team_id,bidder_id",
+  }
+)
 
         if (error)
           throw error
 
-        alert(
-          "Max bid saved!"
-        )
+        setToast({
+  show: true,
+  type: "success",
+  title: "Max Bid Saved",
+  message: `$${amount.toLocaleString()} max bid saved successfully.`,
+})
 
         setMaxBid("")
 
@@ -96,9 +121,12 @@ export default function MaxBidModal({
           err
         )
 
-        alert(
-          err.message
-        )
+        setToast({
+  show: true,
+  type: "error",
+  title: "Max Bid Failed",
+  message: err.message || "Something went wrong.",
+})
 
       } finally {
 
@@ -192,6 +220,19 @@ export default function MaxBidModal({
         </div>
 
       </div>
+
+      <Toast
+  show={toast.show}
+  type={toast.type}
+  title={toast.title}
+  message={toast.message}
+  onClose={() =>
+    setToast({
+      ...toast,
+      show: false,
+    })
+  }
+/>
 
     </div>
 

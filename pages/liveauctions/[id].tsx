@@ -10,6 +10,7 @@ import AuctionTimer from "@/components/auction/auctiontimer"
 import BidBoard from "@/components/auction/BidBoard"
 
 import { supabase } from "@/lib/supabase"
+import LiveAuctionChat from "@/components/livechat/LiveAuctionChat"
 
 export default function LiveAuctionRoomPage() {
 
@@ -366,6 +367,12 @@ setTeams(
   }
   user={user}
 />
+
+{auction && (
+  <LiveAuctionChat
+    auctionId={auction.id}
+  />
+)}
 
       </main>
 

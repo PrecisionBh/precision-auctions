@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { supabase } from "@/lib/supabase"
+import Toast from "@/components/toast"
 
 type Props = {
   open: boolean
@@ -23,6 +24,19 @@ export default function BidNowModal({
   const [loading, setLoading] =
     useState(false)
 
+    const [
+  toast,
+  setToast,
+] = useState({
+  show: false,
+  type: "success" as
+    "success" |
+    "error" |
+    "warning",
+  title: "",
+  message: "",
+})
+
   if (!open || !team)
     return null
 
@@ -41,9 +55,12 @@ export default function BidNowModal({
         (team.current_bid || 0)
     ) {
 
-      alert(
-        `Bid must be greater than $${team.current_bid || 0}`
-      )
+      setToast({
+  show: true,
+  type: "warning",
+  title: "Bid Too Low",
+  message: `Bid must be greater than $${team.current_bid || 0}`,
+})
 
       return
 
@@ -56,9 +73,12 @@ export default function BidNowModal({
 
     if (!session) {
 
-      alert(
-        "Please login first"
-      )
+      setToast({
+  show: true,
+  type: "warning",
+  title: "Login Required",
+  message: "Please login before bidding.",
+})
 
       return
 
@@ -92,6 +112,12 @@ export default function BidNowModal({
     if (data?.error) {
       throw new Error(data.error)
     }
+    setToast({
+  show: true,
+  type: "success",
+  title: "Bid Placed",
+  message: `$${amount.toLocaleString()} bid submitted.`,
+})
 
     setBidAmount("")
 
@@ -104,10 +130,14 @@ export default function BidNowModal({
       err
     )
 
-    alert(
-      err.message ||
-        JSON.stringify(err)
-    )
+    setToast({
+  show: true,
+  type: "error",
+  title: "Bid Failed",
+  message:
+    err.message ||
+    "Unable to place bid.",
+})
 
   } finally {
 
@@ -213,6 +243,18 @@ export default function BidNowModal({
         </div>
 
       </div>
+      <Toast
+  show={toast.show}
+  type={toast.type}
+  title={toast.title}
+  message={toast.message}
+  onClose={() =>
+    setToast({
+      ...toast,
+      show: false,
+    })
+  }
+/>
 
     </div>
 
