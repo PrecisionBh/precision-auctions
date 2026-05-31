@@ -29,6 +29,11 @@ export default function LiveAuctionRoomPage() {
   const [user, setUser] =
     useState<any>(null)
 
+    const [
+  favoriteIds,
+  setFavoriteIds,
+] = useState<number[]>([])
+
     useEffect(() => {
 
   if (!id) return
@@ -158,13 +163,53 @@ useEffect(() => {
 
       setUser(data.user)
 
-      fetchAuction()
+await loadFavorites(
+  data.user.id
+)
+
+fetchAuction()
 
     } catch (err) {
 
       console.error(err)
 
     }
+
+  }
+
+  const loadFavorites =
+  async (
+    userId: string
+  ) => {
+
+    const {
+      data,
+      error,
+    } = await supabase
+      .from(
+        "auction_favorites"
+      )
+      .select(
+        "team_id"
+      )
+      .eq(
+        "user_id",
+        userId
+      )
+
+    if (error) {
+
+      console.error(error)
+
+      return
+
+    }
+
+    setFavoriteIds(
+      (data || []).map(
+        fav => fav.team_id
+      )
+    )
 
   }
 
@@ -315,6 +360,11 @@ setTeams(
         <BidBoard
   teams={teams}
   auction={auction}
+  favoriteIds={favoriteIds}
+  setFavoriteIds={
+    setFavoriteIds
+  }
+  user={user}
 />
 
       </main>

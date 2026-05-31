@@ -13,12 +13,20 @@ import {
   TrendingUp,
 } from "lucide-react"
 
+import { supabase } from "@/lib/supabase"
+
 type Props = {
   team: any
   index: number
   auction: any
   onBid: (team: any) => void
   onMaxBid: (team: any) => void
+
+  favoriteIds: number[]
+
+  setFavoriteIds: React.Dispatch<
+    React.SetStateAction<number[]>
+  >
 }
 
 export default function BidRow({
@@ -27,6 +35,8 @@ export default function BidRow({
   auction,
   onBid,
   onMaxBid,
+  favoriteIds,
+  setFavoriteIds,
 }: Props) {
 
     const [
@@ -34,10 +44,88 @@ export default function BidRow({
     setTimeLeft,
   ] = useState("")
 
-  const [
-  isFavorite,
-  setIsFavorite,
-] = useState(false)
+  const isFavorite =
+  favoriteIds.includes(
+    team.id
+  )
+
+const toggleFavorite =
+  async () => {
+
+    const {
+      data: { user },
+    } =
+      await supabase.auth.getUser()
+
+    if (!user) {
+
+      alert(
+        "Please sign in first."
+      )
+
+      return
+
+    }
+
+    if (isFavorite) {
+
+      const { error } =
+        await supabase
+          .from(
+            "auction_favorites"
+          )
+          .delete()
+          .eq(
+            "user_id",
+            user.id
+          )
+          .eq(
+            "auction_id",
+            auction.id
+          )
+          .eq(
+            "team_id",
+            team.id
+          )
+
+      if (!error) {
+
+        setFavoriteIds(
+  favoriteIds.filter(
+    id => id !== team.id
+  )
+)
+
+      }
+
+    } else {
+
+      const { error } =
+        await supabase
+          .from(
+            "auction_favorites"
+          )
+          .insert({
+            user_id:
+              user.id,
+            auction_id:
+              auction.id,
+            team_id:
+              team.id,
+          })
+
+      if (!error) {
+
+        setFavoriteIds([
+  ...favoriteIds,
+  team.id,
+])
+
+      }
+
+    }
+
+  }
 
   useEffect(() => {
 
@@ -257,11 +345,9 @@ setTimeLeft(
           {/* FAVORITE */}
 
          <button
-  onClick={() =>
-    setIsFavorite(
-      !isFavorite
-    )
-  }
+  onClick={
+  toggleFavorite
+}
   className={`
     flex h-10 w-10
     items-center
@@ -372,11 +458,9 @@ setTimeLeft(
             </button>
 
           <button
-  onClick={() =>
-    setIsFavorite(
-      !isFavorite
-    )
-  }
+  onClick={
+  toggleFavorite
+}
   className={`
     flex h-10 w-10
     items-center
