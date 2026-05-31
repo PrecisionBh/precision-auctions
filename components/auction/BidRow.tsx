@@ -34,6 +34,11 @@ export default function BidRow({
     setTimeLeft,
   ] = useState("")
 
+  const [
+  isFavorite,
+  setIsFavorite,
+] = useState(false)
+
   useEffect(() => {
 
     const updateTimer =
@@ -191,12 +196,10 @@ setTimeLeft(
 
 <div>
 
-  <p className="text-sm font-semibold text-green-400 truncate">
-
-    {team.winner?.username ||
-      "No Bids"}
-
-  </p>
+ <p className="text-sm font-semibold text-green-400 truncate">
+  {team.current_winner_profile?.username ||
+    "No Bids"}
+</p>
 
 </div>
 
@@ -253,9 +256,34 @@ setTimeLeft(
 
           {/* FAVORITE */}
 
-          <button className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-400 transition hover:border-yellow-500 hover:text-yellow-400">
-
-            <Star size={16} />
+         <button
+  onClick={() =>
+    setIsFavorite(
+      !isFavorite
+    )
+  }
+  className={`
+    flex h-10 w-10
+    items-center
+    justify-center
+    rounded-xl
+    border
+    transition
+    ${
+      isFavorite
+        ? "border-yellow-500 text-yellow-400"
+        : "border-zinc-700 text-zinc-400 hover:border-yellow-500 hover:text-yellow-400"
+    }
+  `}
+>
+            <Star
+  size={16}
+  fill={
+    isFavorite
+      ? "currentColor"
+      : "none"
+  }
+/>
 
           </button>
 
@@ -304,11 +332,9 @@ setTimeLeft(
             </p>
 
             <p className="text-green-400 text-xs font-semibold">
-
-              {team.winner?.username ||
-  "No Bids"}
-
-            </p>
+  {team.current_winner_profile?.username ||
+    "No Bids"}
+</p>
 
           </div>
 
@@ -345,9 +371,34 @@ setTimeLeft(
 
             </button>
 
-            <button className="flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-400">
-
-              <Star size={15} />
+          <button
+  onClick={() =>
+    setIsFavorite(
+      !isFavorite
+    )
+  }
+  className={`
+    flex h-10 w-10
+    items-center
+    justify-center
+    rounded-xl
+    border
+    transition
+    ${
+      isFavorite
+        ? "border-yellow-500 text-yellow-400"
+        : "border-zinc-700 text-zinc-400 hover:border-yellow-500 hover:text-yellow-400"
+    }
+  `}
+>
+             <Star
+  size={15}
+  fill={
+    isFavorite
+      ? "currentColor"
+      : "none"
+  }
+/>
 
             </button>
 

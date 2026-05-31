@@ -29,6 +29,65 @@ export default function LiveAuctionRoomPage() {
   const [user, setUser] =
     useState<any>(null)
 
+    useEffect(() => {
+
+  if (!id) return
+
+  const bidsChannel =
+    supabase
+      .channel(
+        `auction-${id}`
+      )
+
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "bids",
+        },
+        () => {
+
+          console.log(
+            "Bid Update"
+          )
+
+          fetchAuction()
+
+        }
+      )
+
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table:
+            "tournament_teams",
+        },
+        () => {
+
+          console.log(
+            "Team Update"
+          )
+
+          fetchAuction()
+
+        }
+      )
+
+      .subscribe()
+
+  return () => {
+
+    supabase.removeChannel(
+      bidsChannel
+    )
+
+  }
+
+}, [id])
+
   useEffect(() => {
 
     if (id) {
@@ -36,6 +95,48 @@ export default function LiveAuctionRoomPage() {
       checkAuth()
 
     }
+
+    }, [id])
+
+useEffect(() => {
+
+  const interval =
+    setInterval(
+      async () => {
+
+        try {
+
+          await supabase.functions.invoke(
+            "process-next-max-bid"
+          )
+
+        } catch (err) {
+
+          console.error(
+            "AUTO BID ERROR",
+            err
+          )
+
+        }
+
+      },
+      1000
+    )
+
+  return () =>
+    clearInterval(
+      interval
+    )
+
+}, [])
+
+useEffect(() => {
+
+  if (id) {
+
+    checkAuth()
+
+  }
 
   }, [id])
 
@@ -94,16 +195,17 @@ export default function LiveAuctionRoomPage() {
       setAuction(data)
 
       const {
-        data: teamsData,
-        error: teamsError,
-      } = await supabase
-        .from("tournament_teams")
-.select(`
-  *,
-  winner:profiles!current_winner(
-    username
-  )
-`)
+  data: teamsData,
+  error: teamsError,
+} = await supabase
+  .from("tournament_teams")
+  .select(`
+    *,
+    current_winner_profile:profiles!tournament_teams_current_winner_fkey(
+      id,
+      username
+    )
+  `)
         .eq(
           "tournament_id",
           data.tournament_id
@@ -122,37 +224,30 @@ export default function LiveAuctionRoomPage() {
       }
 
       const formattedTeams =
-        (teamsData || []).map(
-          (team) => ({
+  (teamsData || []).map(
+    (team) => ({
 
-            ...team,
+      ...team,
 
-            auction_id:
-              data.id,
+      auction_id:
+        data.id,
 
-          })
-        )
+    })
+  )
 
-      setTeams(
-        formattedTeams
-      )
+setTeams(
+  formattedTeams
+)
 
-    } catch (err) {
+} catch (err) {
 
-      console.error(err)
+  console.error(err)
 
-    } finally {
+} finally {
 
-      setLoading(false)
+  setLoading(false)
 
-    }
-
-  }
-
-  if (
-    loading ||
-    !auction
-  ) {
+}
 
     return (
 
@@ -201,16 +296,19 @@ export default function LiveAuctionRoomPage() {
         {/* TIMER */}
 
         <AuctionTimer
-          tournamentName={
-            auction?.name || ""
-          }
-          startTime={
-            auction?.start_time || ""
-          }
-          totalTeams={
-            teams.length
-          }
-        />
+  tournamentName={
+    auction?.name || ""
+  }
+  startTime={
+    auction?.start_time || ""
+  }
+  endTime={
+    auction?.end_time || ""
+  }
+  totalTeams={
+    teams.length
+  }
+/>
 
         {/* BID BOARD */}
 

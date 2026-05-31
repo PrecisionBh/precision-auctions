@@ -28,96 +28,94 @@ export default function BidNowModal({
 
   const handlePlaceBid = async () => {
 
-    try {
+  try {
 
-      setLoading(true)
+    setLoading(true)
 
-      const amount =
-        Number(bidAmount)
+    const amount =
+      Number(bidAmount)
 
-      if (
-        !amount ||
-        amount <=
-          (team.current_bid || 0)
-      ) {
+    if (
+      !amount ||
+      amount <=
+        (team.current_bid || 0)
+    ) {
 
-        alert(
-          `Bid must be greater than $${team.current_bid || 0}`
-        )
+      alert(
+        `Bid must be greater than $${team.current_bid || 0}`
+      )
 
-        return
-      }
-
-      const {
-        data: { user },
-      } =
-        await supabase.auth.getUser()
-
-      if (!user) {
-
-        alert(
-          "Please login first"
-        )
-
-        return
-      }
-
-      const { error: bidError } =
-        await supabase
-          .from("bids")
-          .insert({
-            auction_id:
-              team.auction_id,
-            team_id:
-              team.id,
-            bidder_id:
-              user.id,
-            amount,
-          })
-
-      if (bidError)
-        throw bidError
-
-      const {
-        error: teamError,
-
-        
-      } = await supabase
-        .from(
-          "tournament_teams"
-        )
-        .update({
-          current_bid: amount,
-          current_winner:
-            user.id,
-        })
-        .eq("id", team.id)
-
-      if (teamError)
-        throw teamError
-
-      setBidAmount("")
-
-      onClose()
-
-    } catch (err: any) {
-
-  console.error(
-    "BID ERROR:",
-    err
-  )
-
-  alert(
-    JSON.stringify(err)
-  )
-
-} finally {
-
-      setLoading(false)
+      return
 
     }
 
+    const {
+      data: { session },
+    } =
+      await supabase.auth.getSession()
+
+    if (!session) {
+
+      alert(
+        "Please login first"
+      )
+
+      return
+
+    }
+
+    const {
+      data,
+      error,
+    } =
+      await supabase.functions.invoke(
+        "placeBid",
+        {
+          body: {
+            auctionId:
+              team.auction_id,
+            teamId:
+              team.id,
+            amount,
+          },
+          headers: {
+            Authorization:
+              `Bearer ${session.access_token}`,
+          },
+        }
+      )
+
+    if (error) {
+      throw error
+    }
+
+    if (data?.error) {
+      throw new Error(data.error)
+    }
+
+    setBidAmount("")
+
+    onClose()
+
+  } catch (err: any) {
+
+    console.error(
+      "BID ERROR:",
+      err
+    )
+
+    alert(
+      err.message ||
+        JSON.stringify(err)
+    )
+
+  } finally {
+
+    setLoading(false)
+
   }
+
+}
 
   return (
 

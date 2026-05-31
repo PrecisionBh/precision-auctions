@@ -1,3 +1,9 @@
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
+}
+
 import { serve } from "https://deno.land/std/http/server.ts"
 
 import {
@@ -6,7 +12,31 @@ import {
 
 serve(async (req) => {
 
+  console.log(
+    "METHOD",
+    req.method
+  )
+
+  if (
+    req.method ===
+    "OPTIONS"
+  ) {
+
+    return new Response(
+      "ok",
+      {
+        headers:
+          corsHeaders,
+      }
+    )
+
+  }
+
   try {
+
+    console.log(
+      "PLACE BID FUNCTION STARTED"
+    )
 
     const authHeader =
       req.headers.get(
@@ -37,6 +67,15 @@ serve(async (req) => {
       amount,
     } = await req.json()
 
+    console.log(
+      "REQUEST",
+      {
+        auctionId,
+        teamId,
+        amount,
+      }
+    )
+
     const {
       data: userData,
     } =
@@ -50,17 +89,32 @@ serve(async (req) => {
     const bidderId =
       userData.user?.id
 
+    console.log(
+      "BIDDER",
+      bidderId
+    )
+
     if (!bidderId) {
 
       return new Response(
-        JSON.stringify({
-          error:
-            "Unauthorized",
-        }),
-        { status: 401 }
-      )
+  JSON.stringify({
+    error:
+      "Unauthorized",
+  }),
+  {
+    status: 401,
+    headers:
+      corsHeaders,
+  }
+)
 
     }
+
+    const MIN_INCREMENT =
+      10
+
+    const manualAmount =
+      Number(amount)
 
     const {
       data: team,
@@ -86,8 +140,10 @@ serve(async (req) => {
 
     }
 
-    const MIN_INCREMENT =
-      10
+    console.log(
+      "TEAM FOUND",
+      team.id
+    )
 
     const currentBid =
       Number(
@@ -95,32 +151,257 @@ serve(async (req) => {
       )
 
     if (
-      amount <
+      manualAmount <
       currentBid +
         MIN_INCREMENT
     ) {
 
       return new Response(
-        JSON.stringify({
-          error:
-            `Minimum bid is $${currentBid + MIN_INCREMENT}`,
-        }),
-        { status: 400 }
-      )
+  JSON.stringify({
+    error:
+      `Minimum bid is $${currentBid + MIN_INCREMENT}`,
+  }),
+  {
+    status: 400,
+    headers:
+      corsHeaders,
+  }
+)
 
     }
 
-    await supabase
-      .from("bids")
-      .insert({
-        auction_id:
-          auctionId,
-        team_id:
-          teamId,
-        bidder_id:
-          bidderId,
-        amount,
-      })
+    console.log(
+      "INSERTING MANUAL BID"
+    )
+
+    const {
+      error: manualBidError,
+    } =
+      await supabase
+        .from("bids")
+        .insert({
+          auction_id:
+            auctionId,
+          team_id:
+            teamId,
+          bidder_id:
+            bidderId,
+          amount:
+            manualAmount,
+        })
+
+    if (manualBidError) {
+      throw manualBidError
+    }
+
+    let liveAmount =
+      manualAmount
+
+    let liveWinner =
+      bidderId
+
+    console.log(
+      "MANUAL BID INSERTED",
+      {
+        liveAmount,
+        liveWinner,
+      }
+    )
+
+    const {
+      data: auction,
+    } =
+      await supabase
+        .from(
+          "auctions"
+        )
+        .select(
+          "id,end_time"
+        )
+        .eq(
+          "id",
+          auctionId
+        )
+        .single()
+
+    if (auction) {
+
+      const now =
+        new Date()
+
+      const endTime =
+  new Date(
+    team.extended_end_time ||
+    auction.end_time
+  )
+
+      const remaining =
+        endTime.getTime() -
+        now.getTime()
+
+        if (remaining <= 0) {
+
+  return new Response(
+    JSON.stringify({
+      error:
+        "This team auction has ended",
+    }),
+    {
+      status: 400,
+      headers:
+        corsHeaders,
+    }
+  )
+
+}
+
+      console.log(
+        "SECONDS REMAINING",
+        remaining / 1000
+      )
+
+      if (
+        remaining <= 60000
+      ) {
+
+        console.log(
+          "ANTI SNIPE FIRED"
+        )
+
+        const newEndTime =
+          new Date(
+            now.getTime() +
+              60000
+          )
+
+        await supabase
+  .from(
+    "tournament_teams"
+  )
+  .update({
+    extended_end_time:
+      newEndTime.toISOString(),
+  })
+  .eq(
+    "id",
+    teamId
+  )
+
+      }
+
+    }
+
+    const {
+      data: maxBids,
+      error: maxBidsError,
+    } =
+      await supabase
+        .from(
+          "max_bids"
+        )
+        .select("*")
+        .eq(
+          "auction_id",
+          auctionId
+        )
+        .eq(
+          "team_id",
+          teamId
+        )
+        .order(
+          "max_amount",
+          {
+            ascending:
+              false,
+          }
+        )
+
+    if (maxBidsError) {
+      throw maxBidsError
+    }
+
+    console.log(
+      "MAX BIDS",
+      JSON.stringify(
+        maxBids
+      )
+    )
+
+    if (maxBids) {
+
+  maxBids.sort(
+    (a: any, b: any) =>
+      Number(b.max_amount) -
+      Number(a.max_amount)
+  )
+
+}
+
+if (
+  maxBids &&
+  maxBids.length > 1
+) {
+
+  const leader =
+    maxBids[0]
+
+  const challenger =
+    maxBids.find(
+      (x: any) =>
+        x.bidder_id !==
+        leader.bidder_id
+    )
+
+  if (challenger) {
+
+    const nextBidder =
+      liveWinner ===
+      leader.bidder_id
+        ? challenger
+        : leader
+
+    const nextAmount =
+      liveAmount +
+      MIN_INCREMENT
+
+    if (
+      Number(
+        nextBidder.max_amount
+      ) >= nextAmount
+    ) {
+
+      await supabase
+        .from("bids")
+        .insert({
+          auction_id:
+            auctionId,
+          team_id:
+            teamId,
+          bidder_id:
+            nextBidder.bidder_id,
+          amount:
+            nextAmount,
+        })
+
+      liveAmount =
+        nextAmount
+
+      liveWinner =
+        nextBidder.bidder_id
+
+    }
+
+  }
+
+}
+
+    console.log(
+      "FINAL RESULT",
+      {
+        liveAmount,
+        liveWinner,
+      }
+    )
 
     await supabase
       .from(
@@ -128,9 +409,9 @@ serve(async (req) => {
       )
       .update({
         current_bid:
-          amount,
+          liveAmount,
         current_winner:
-          bidderId,
+          liveWinner,
       })
       .eq(
         "id",
@@ -138,22 +419,38 @@ serve(async (req) => {
       )
 
     return new Response(
-      JSON.stringify({
-        success: true,
-      }),
-      { status: 200 }
-    )
+  JSON.stringify({
+    success: true,
+    currentBid:
+      liveAmount,
+    currentWinner:
+      liveWinner,
+  }),
+  {
+    status: 200,
+    headers:
+      corsHeaders,
+  }
+)
 
   } catch (err: any) {
 
-    return new Response(
-      JSON.stringify({
-        error:
-          err.message,
-      }),
-      { status: 500 }
+    console.error(
+      "PLACE BID ERROR",
+      err
     )
 
+    return new Response(
+  JSON.stringify({
+    error:
+      err.message,
+  }),
+  {
+    status: 500,
+    headers:
+      corsHeaders,
+  }
+)
   }
 
 })
