@@ -27,6 +27,8 @@ export default function LiveAuctionRoomPage() {
   const [teams, setTeams] =
     useState<any[]>([])
 
+    
+
   const [user, setUser] =
     useState<any>(null)
 
