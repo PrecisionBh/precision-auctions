@@ -209,20 +209,50 @@ serve(async (req) => {
     )
 
     const {
-      data: auction,
-    } =
-      await supabase
-        .from(
-          "auctions"
-        )
-        .select(
-          "id,end_time"
-        )
-        .eq(
-          "id",
-          auctionId
-        )
-        .single()
+  data: auction,
+} =
+  await supabase
+    .from(
+      "auctions"
+    )
+    .select(
+      "id,start_time,end_time"
+    )
+    .eq(
+      "id",
+      auctionId
+    )
+    .single()
+
+if (auction) {
+
+  const now =
+    new Date()
+
+  const startTime =
+    new Date(
+      auction.start_time
+    )
+
+  if (
+    now < startTime
+  ) {
+
+    return new Response(
+      JSON.stringify({
+        error:
+          "Auction has not started yet.",
+      }),
+      {
+        status: 400,
+        headers:
+          corsHeaders,
+      }
+    )
+
+  }
+
+}
 
     if (auction) {
 

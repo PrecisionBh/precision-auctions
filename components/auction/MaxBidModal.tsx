@@ -8,12 +8,14 @@ type Props = {
   open: boolean
   onClose: () => void
   team: any
+  auction: any
 }
 
 export default function MaxBidModal({
   open,
   onClose,
   team,
+  auction,
 }: Props) {
 
   const [maxBid, setMaxBid] =
@@ -44,6 +46,33 @@ export default function MaxBidModal({
       try {
 
         setLoading(true)
+
+        const now =
+  new Date()
+
+const startTime =
+  new Date(
+    team.auction_start_time ||
+    auction?.start_time
+  )
+
+if (
+  now < startTime
+) {
+
+  setToast({
+    show: true,
+    type: "warning",
+    title: "Auction Not Live",
+    message:
+      "Max bids can only be set once the auction starts.",
+  })
+
+  return
+
+}
+
+
 
         const amount =
           Number(maxBid)

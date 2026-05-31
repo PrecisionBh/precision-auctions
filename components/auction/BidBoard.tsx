@@ -263,16 +263,17 @@ export default function BidBoard({
       />
 
       <MaxBidModal
-        open={showMaxBidModal}
-        team={selectedTeam}
-        onClose={() => {
+  open={showMaxBidModal}
+  team={selectedTeam}
+  auction={auction}
+  onClose={() => {
 
-          setShowMaxBidModal(false)
+    setShowMaxBidModal(false)
 
-          setSelectedTeam(null)
+    setSelectedTeam(null)
 
-        }}
-      />
+  }}
+/>
 
     </>
 

@@ -67,7 +67,9 @@ serve(async () => {
       data: auction,
     } = await supabase
       .from("auctions")
-      .select("id,end_time")
+      .select(
+  "id,start_time,end_time"
+)
       .eq("id", auctionId)
       .single()
 
@@ -77,6 +79,19 @@ serve(async () => {
 
     const now =
       new Date()
+
+      const startTime =
+  new Date(
+    auction.start_time
+  )
+
+if (
+  now < startTime
+) {
+
+  continue
+
+}
 
     const endTime =
   new Date(
