@@ -40,13 +40,17 @@ export default function AuthModal({
       setLoading(true)
 
       const {
-        error,
-      } = await supabase.auth.signInWithPassword({
+  data,
+  error,
+} = await supabase.auth.signInWithPassword({
 
-        email,
-        password,
+  email,
+  password,
 
-      })
+})
+
+console.log("LOGIN DATA:", data)
+console.log("LOGIN ERROR:", error)
 
       if (error) {
 
