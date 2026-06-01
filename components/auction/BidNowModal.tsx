@@ -115,7 +115,7 @@ export default function BidNowModal({
 }
 
 if (
-  !data?.success
+  data?.success === false
 ) {
 
   setToast({
