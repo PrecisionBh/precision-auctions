@@ -193,7 +193,7 @@ if (
 
           <p className="mt-3 text-zinc-500 text-sm leading-relaxed">
 
-            Your max bid will automatically bid for you up to your selected amount.
+            Your max bid will automatically bid for you up to your selected amount at the $10 minimum increment. To remove your max bid set your max bid to 0. 
 
           </p>
 
