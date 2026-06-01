@@ -76,7 +76,23 @@ if (
 
         const amount =
           Number(maxBid)
+          
+          if (
+  !team.current_winner &&
+  amount <
+    auction.minimum_starting_bid
+) {
 
+  setToast({
+    show: true,
+    type: "warning",
+    title: "Bid Too Low",
+    message: `Minimum starting bid is $${auction.minimum_starting_bid}.`,
+  })
+
+  return
+
+}
         if (
           !amount ||
           amount <= 0
@@ -131,6 +147,51 @@ if (
 
         if (error)
           throw error
+
+        // If nobody is currently winning,
+// place the opening bid automatically
+
+if (!team.current_winner) {
+
+  const openingBid =
+    auction.minimum_starting_bid
+
+  const { error: bidError } =
+    await supabase
+      .from("bids")
+      .insert({
+        auction_id:
+          team.auction_id,
+        team_id:
+          team.id,
+        bidder_id:
+          user.id,
+        amount:
+          openingBid,
+      })
+
+  if (bidError)
+    throw bidError
+
+  const {
+    error: updateError,
+  } =
+    await supabase
+      .from(
+        "tournament_teams"
+      )
+      .update({
+        current_bid:
+          openingBid,
+        current_winner:
+          user.id,
+      })
+      .eq("id", team.id)
+
+  if (updateError)
+    throw updateError
+
+}
 
         setToast({
   show: true,

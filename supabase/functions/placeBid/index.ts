@@ -198,14 +198,26 @@ if (auction) {
   const now =
     new Date()
 
-  const startTime =
-    new Date(
-      auction.start_time
-    )
+    
 
-  if (
-    now < startTime
-  ) {
+  const startTime =
+  new Date(
+    auction.start_time
+  )
+
+console.log(
+  "NOW",
+  now.toISOString()
+)
+
+console.log(
+  "START",
+  startTime.toISOString()
+)
+
+if (
+  now < startTime
+) {
 
     return new Response(
   JSON.stringify({
