@@ -114,7 +114,13 @@ serve(async (req) => {
       10
 
     const manualAmount =
-      Number(amount)
+  Number(amount)
+
+let liveAmount =
+  manualAmount
+
+let liveWinner =
+  bidderId
 
     const {
       data: team,
@@ -169,44 +175,7 @@ serve(async (req) => {
 )
 
     }
-
-    console.log(
-      "INSERTING MANUAL BID"
-    )
-
-    const {
-      error: manualBidError,
-    } =
-      await supabase
-        .from("bids")
-        .insert({
-          auction_id:
-            auctionId,
-          team_id:
-            teamId,
-          bidder_id:
-            bidderId,
-          amount:
-            manualAmount,
-        })
-
-    if (manualBidError) {
-      throw manualBidError
-    }
-
-    let liveAmount =
-      manualAmount
-
-    let liveWinner =
-      bidderId
-
-    console.log(
-      "MANUAL BID INSERTED",
-      {
-        liveAmount,
-        liveWinner,
-      }
-    )
+  
 
     const {
   data: auction,
@@ -239,16 +208,15 @@ if (auction) {
   ) {
 
     return new Response(
-      JSON.stringify({
-        error:
-          "Auction has not started yet.",
-      }),
-      {
-        status: 400,
-        headers:
-          corsHeaders,
-      }
-    )
+  JSON.stringify({
+    success: false,
+    error: "Auction has not started yet."
+  }),
+  {
+    status: 200,
+    headers: corsHeaders,
+  }
+)
 
   }
 
@@ -284,6 +252,106 @@ if (auction) {
   )
 
 }
+
+console.log(
+
+      "INSERTING MANUAL BID"
+
+    )
+
+
+
+    const {
+
+      error: manualBidError,
+
+    } =
+
+      await supabase
+
+        .from("bids")
+
+        .insert({
+
+          auction_id:
+
+            auctionId,
+
+          team_id:
+
+            teamId,
+
+          bidder_id:
+
+            bidderId,
+
+          amount:
+
+            manualAmount,
+
+        })
+
+
+
+    if (manualBidError) {
+
+
+
+  return new Response(
+
+    JSON.stringify({
+
+      success: false,
+
+      error:
+
+        manualBidError.message,
+
+    }),
+
+    {
+
+      status: 200,
+
+      headers:
+
+        corsHeaders,
+
+    }
+
+  )
+
+
+
+}
+
+
+
+    let liveAmount =
+
+      manualAmount
+
+
+
+    let liveWinner =
+
+      bidderId
+
+
+
+    console.log(
+
+      "MANUAL BID INSERTED",
+
+      {
+
+        liveAmount,
+
+        liveWinner,
+
+      }
+
+    )
 
       console.log(
         "SECONDS REMAINING",
@@ -412,12 +480,6 @@ if (
           amount:
             nextAmount,
         })
-
-      liveAmount =
-        nextAmount
-
-      liveWinner =
-        nextBidder.bidder_id
 
     }
 

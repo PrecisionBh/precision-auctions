@@ -105,30 +105,69 @@ export default function BidNowModal({
         }
       )
 
-    if (error) {
-      throw error
-    }
+      console.log(
+  "PLACE BID RESPONSE",
+  data
+)
 
-    if (data?.error) {
-      throw new Error(data.error)
-    }
-    setToast({
+   if (error) {
+  throw error
+}
+
+if (
+  !data?.success
+) {
+
+  setToast({
+    show: true,
+    type: "error",
+    title: "Bid Failed",
+    message:
+      data?.error ||
+      "Cannot bid until auction opens.",
+  })
+
+  await new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        2000
+      )
+  )
+
+  return
+
+}
+
+setToast({
   show: true,
   type: "success",
   title: "Bid Placed",
   message: `$${amount.toLocaleString()} bid submitted.`,
 })
 
-    setBidAmount("")
+await new Promise(
+  resolve =>
+    setTimeout(
+      resolve,
+      1500
+    )
+)
 
-    onClose()
+setBidAmount("")
+
+onClose()
 
   } catch (err: any) {
 
-    console.error(
-      "BID ERROR:",
-      err
-    )
+    console.log(
+  "FULL ERROR",
+  JSON.stringify(
+    err,
+    null,
+    2
+  )
+)
 
     setToast({
   show: true,
