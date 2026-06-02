@@ -192,7 +192,9 @@ export default function BidBoard({
         >
           Winning
         </button>
-
+<div className="flex items-center px-4 py-2 rounded-xl border border-zinc-700 bg-zinc-900 text-white font-black text-sm">
+  {teams.length} Teams
+</div>
       </div>
 
       <div className="overflow-hidden rounded-[28px] border border-zinc-800 bg-zinc-950/90">

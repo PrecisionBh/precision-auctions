@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 
 import { supabase } from "@/lib/supabase"
-
+import ChatWelcome from "./ChatWelcome"
 import ChatMessages from "./ChatMessages"
 import ChatInput from "./ChatInput"
 
@@ -29,6 +29,11 @@ export default function LiveAuctionChat({
   const [
   isOpen,
   setIsOpen,
+] = useState(false)
+
+const [
+  enteredChat,
+  setEnteredChat,
 ] = useState(false)
 
   const [
@@ -237,9 +242,13 @@ export default function LiveAuctionChat({
           </p>
 
           <button
-            onClick={() =>
-              setIsOpen(false)
-            }
+            onClick={() => {
+
+  setIsOpen(false)
+
+  setEnteredChat(false)
+
+}}
             className="text-xl font-black text-orange-400 hover:text-orange-300"
           >
 
@@ -249,18 +258,34 @@ export default function LiveAuctionChat({
 
         </div>
 
-        <ChatMessages
-          messages={messages}
-        />
+        {!enteredChat ? (
 
-        <ChatInput
-          onSend={
-            handleSend
-          }
-          loading={
-            loading
-          }
-        />
+  <ChatWelcome
+    onEnter={() =>
+      setEnteredChat(true)
+    }
+  />
+
+) : (
+
+  <>
+
+    <ChatMessages
+      messages={messages}
+    />
+
+    <ChatInput
+      onSend={
+        handleSend
+      }
+      loading={
+        loading
+      }
+    />
+
+  </>
+
+)}
 
       </div>
 

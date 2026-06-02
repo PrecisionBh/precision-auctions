@@ -46,6 +46,47 @@ export default function BidNowModal({
 
     setLoading(true)
 
+    const now = Date.now()
+
+const startTime =
+  new Date(
+    auction.start_time
+  ).getTime()
+
+const endTime =
+  new Date(
+    team.extended_end_time ||
+    auction.end_time
+  ).getTime()
+
+if (now < startTime) {
+
+  setToast({
+    show: true,
+    type: "warning",
+    title: "Auction Not Live",
+    message:
+      "Cannot bid until auction opens.",
+  })
+
+  return
+
+}
+
+if (now > endTime) {
+
+  setToast({
+    show: true,
+    type: "error",
+    title: "Auction Closed",
+    message:
+      "This auction is closed.",
+  })
+
+  return
+
+}
+
     const amount =
       Number(bidAmount)
 

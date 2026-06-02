@@ -56,6 +56,12 @@ const startTime =
     auction?.start_time
   )
 
+const endTime =
+  new Date(
+    team.extended_end_time ||
+    auction?.end_time
+  )
+
 if (
   now < startTime
 ) {
@@ -66,6 +72,22 @@ if (
     title: "Auction Not Live",
     message:
       "Max bids can only be set once the auction starts.",
+  })
+
+  return
+
+}
+
+if (
+  now > endTime
+) {
+
+  setToast({
+    show: true,
+    type: "error",
+    title: "Auction Closed",
+    message:
+      "This auction is closed.",
   })
 
   return

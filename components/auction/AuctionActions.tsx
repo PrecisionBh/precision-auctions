@@ -2,6 +2,7 @@
 
 type Props = {
   sortMode: string
+  totalTeams: number
 
   onAddTeam: () => void
 
@@ -12,13 +13,14 @@ type Props = {
 
 export default function AuctionActions({
   sortMode,
+  totalTeams,
   onAddTeam,
   onSort,
 }: Props) {
 
   return (
 
-    <div className="flex flex-wrap gap-4 mb-8">
+    <div className="flex flex-wrap items-center gap-4 mb-8">
 
       {/* ADD TEAM */}
 
@@ -62,6 +64,12 @@ export default function AuctionActions({
       >
         Fargo Low → High
       </button>
+
+      {/* TEAM COUNT */}
+
+      <div className="px-5 py-4 rounded-2xl bg-orange-500 text-white font-black">
+  {totalTeams} Teams On Auction
+</div>
 
     </div>
 

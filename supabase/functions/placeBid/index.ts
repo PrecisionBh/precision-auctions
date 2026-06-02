@@ -253,13 +253,12 @@ if (
 
   return new Response(
     JSON.stringify({
-      error:
-        "This team auction has ended",
+      success: false,
+      error: "This auction is closed.",
     }),
     {
-      status: 400,
-      headers:
-        corsHeaders,
+      status: 200,
+      headers: corsHeaders,
     }
   )
 

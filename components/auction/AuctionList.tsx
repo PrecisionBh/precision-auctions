@@ -286,12 +286,13 @@ export default function AuctionList({
         {/* ACTIONS */}
 
         <AuctionActions
-          sortMode={sortMode}
-          onAddTeam={() =>
-            setShowAddModal(true)
-          }
-          onSort={handleSort}
-        />
+  sortMode={sortMode}
+  totalTeams={entries.length}
+  onAddTeam={() =>
+    setShowAddModal(true)
+  }
+  onSort={handleSort}
+/>
 
         {/* TABLE */}
 
