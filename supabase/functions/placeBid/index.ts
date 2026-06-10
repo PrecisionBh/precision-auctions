@@ -151,6 +151,9 @@ let liveWinner =
       team.id
     )
 
+    const previousWinnerId =
+  team.current_winner
+
     const currentBid =
       Number(
         team.current_bid || 0
@@ -185,8 +188,8 @@ let liveWinner =
       "auctions"
     )
     .select(
-      "id,start_time,end_time"
-    )
+  "id,name,start_time,end_time"
+)
     .eq(
       "id",
       auctionId
@@ -338,18 +341,6 @@ console.log(
 
 
 
-    let liveAmount =
-
-      manualAmount
-
-
-
-    let liveWinner =
-
-      bidderId
-
-
-
     console.log(
 
       "MANUAL BID INSERTED",
@@ -474,25 +465,115 @@ if (
       MIN_INCREMENT
 
     if (
-      Number(
-        nextBidder.max_amount
-      ) >= nextAmount
-    ) {
+  Number(
+    nextBidder.max_amount
+  ) >= nextAmount
+) {
+
+  await supabase
+    .from("bids")
+    .insert({
+      auction_id:
+        auctionId,
+      team_id:
+        teamId,
+      bidder_id:
+        nextBidder.bidder_id,
+      amount:
+        nextAmount,
+    })
+
+}
+else {
+
+  try {
+
+    const {
+      data: profile,
+    } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq(
+        "id",
+        nextBidder.bidder_id
+      )
+      .single()
+
+    const {
+  data: existingNotification,
+} = await supabase
+  .from("notifications")
+  .select("id")
+  .eq(
+    "user_id",
+    nextBidder.bidder_id
+  )
+  .eq(
+    "team_id",
+    teamId
+  )
+  .eq(
+    "type",
+    "max_bid_reached"
+  )
+  .maybeSingle()
+
+if (
+  profile?.email &&
+  !existingNotification
+) {
 
       await supabase
-        .from("bids")
+        .from("notifications")
         .insert({
+          user_id:
+            nextBidder.bidder_id,
           auction_id:
             auctionId,
           team_id:
             teamId,
-          bidder_id:
-            nextBidder.bidder_id,
-          amount:
-            nextAmount,
+          type:
+            "max_bid_reached",
         })
 
+      await fetch(
+        "https://auctions.precisioncues.com/api/send-max-bid-reached-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            email:
+              profile.email,
+            teamName:
+              `${team.player1_name} / ${team.player2_name}`,
+            maxBid:
+              nextBidder.max_amount,
+            currentBid:
+              liveAmount,
+            auctionName:
+              auction?.name ||
+              "Precision Auction",
+            auctionUrl:
+              `https://auctions.precisioncues.com/liveauctions/${auctionId}`,
+          }),
+        }
+      )
+
     }
+
+  } catch (error) {
+
+    console.error(
+      "MAX BID EMAIL ERROR",
+      error
+    )
+
+  }
+
+}
 
   }
 
@@ -505,6 +586,84 @@ if (
         liveWinner,
       }
     )
+
+    if (
+  previousWinnerId &&
+  previousWinnerId !== bidderId
+) {
+
+  try {
+
+    const {
+      data: profile,
+    } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq(
+        "id",
+        previousWinnerId
+      )
+      .single()
+
+    if (
+      profile?.email
+    ) {
+
+      await supabase
+  .from("notifications")
+  .insert({
+    user_id: previousWinnerId,
+    auction_id: auctionId,
+    team_id: teamId,
+    type: "outbid",
+  })
+
+      const emailResponse =
+  await fetch(
+    "https://auctions.precisioncues.com/api/send-outbid-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            email:
+              profile.email,
+            teamName:
+              `${team.player1_name} / ${team.player2_name}`,
+            bidAmount:
+              liveAmount,
+            auctionName:
+              auction?.name ||
+              "Precision Auction",
+            auctionUrl:
+              `https://auctions.precisioncues.com/liveauctions/${auctionId}`,
+          }),
+        }
+      )
+
+      console.log(
+  "EMAIL STATUS",
+  emailResponse.status
+)
+
+      console.log(
+        "OUTBID EMAIL SENT"
+      )
+
+    }
+
+  } catch (emailError) {
+
+    console.error(
+      "OUTBID EMAIL ERROR",
+      emailError
+    )
+
+  }
+
+}
 
     await supabase
       .from(

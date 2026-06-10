@@ -12,8 +12,28 @@ export default function LiveAuctionCard({
 
   const router = useRouter()
 
+  const now =
+    new Date()
+
+  const start =
+    new Date(
+      auction.start_time
+    )
+
+  const end =
+    new Date(
+      auction.end_time
+    )
+
+  const isUpcoming =
+    now < start
+
   const isLive =
-    auction.is_live === true
+    now >= start &&
+    now < end
+
+  const isFinished =
+    now >= end
 
   const handleEnterAuction =
     () => {
@@ -28,17 +48,11 @@ export default function LiveAuctionCard({
 
     <div className="relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900/60 backdrop-blur-xl p-5">
 
-      {/* SUBTLE GLOW */}
-
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(249,115,22,0.10),transparent_35%)]" />
 
       <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
 
-        {/* LEFT */}
-
         <div className="min-w-0 flex-1">
-
-          {/* STATUS */}
 
           <div className="flex items-center gap-2 mb-3">
 
@@ -46,6 +60,8 @@ export default function LiveAuctionCard({
               className={`w-2.5 h-2.5 rounded-full ${
                 isLive
                   ? "bg-red-500 animate-pulse"
+                  : isFinished
+                  ? "bg-zinc-500"
                   : "bg-orange-500"
               }`}
             />
@@ -54,27 +70,27 @@ export default function LiveAuctionCard({
               className={`uppercase tracking-[0.2em] text-[10px] font-black ${
                 isLive
                   ? "text-red-400"
+                  : isFinished
+                  ? "text-zinc-400"
                   : "text-orange-400"
               }`}
             >
 
               {isLive
                 ? "LIVE"
+                : isFinished
+                ? "FINISHED"
                 : "UPCOMING"}
 
             </span>
 
           </div>
 
-          {/* TITLE */}
-
           <h2 className="text-2xl md:text-3xl font-black truncate">
 
             {auction.name}
 
           </h2>
-
-          {/* TIME */}
 
           {auction.start_time && (
 
@@ -91,11 +107,7 @@ export default function LiveAuctionCard({
 
         </div>
 
-        {/* RIGHT */}
-
         <div className="flex items-center gap-3">
-
-          {/* LIVE STATUS */}
 
           <div className="hidden sm:flex flex-col items-end">
 
@@ -109,19 +121,21 @@ export default function LiveAuctionCard({
               className={`text-sm font-black ${
                 isLive
                   ? "text-green-400"
+                  : isFinished
+                  ? "text-zinc-400"
                   : "text-orange-400"
               }`}
             >
 
               {isLive
                 ? "LIVE NOW"
+                : isFinished
+                ? "AUCTION ENDED"
                 : "STARTING SOON"}
 
             </p>
 
           </div>
-
-          {/* BUTTON */}
 
           <button
             onClick={

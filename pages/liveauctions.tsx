@@ -20,6 +20,9 @@ export default function LiveAuctionsPage() {
   const [upcomingAuctions, setUpcomingAuctions] =
     useState<any[]>([])
 
+    const [finishedAuctions, setFinishedAuctions] =
+  useState<any[]>([])
+
   const [loading, setLoading] =
     useState(true)
 
@@ -59,56 +62,95 @@ export default function LiveAuctionsPage() {
 
   const fetchAuctions = async () => {
 
-    try {
+  try {
 
-      const {
-        data,
-        error,
-      } = await supabase
-        .from("auctions")
-        .select("*")
-        .order(
-          "start_time",
-          { ascending: true }
-        )
-
-      if (error) {
-
-        console.error(error)
-
-        return
-
-      }
-
-      const live =
-        (data || []).filter(
-          (auction) =>
-            auction.is_live === true
-        )
-
-      const upcoming =
-        (data || []).filter(
-          (auction) =>
-            auction.is_live === false
-        )
-
-      setLiveAuctions(live)
-
-      setUpcomingAuctions(
-        upcoming
+    const {
+      data,
+      error,
+    } = await supabase
+      .from("auctions")
+      .select("*")
+      .order(
+        "start_time",
+        { ascending: true }
       )
 
-    } catch (err) {
+    if (error) {
 
-      console.error(err)
+      console.error(error)
 
-    } finally {
-
-      setLoading(false)
+      return
 
     }
 
+    const now = new Date()
+
+    const upcoming: any[] = []
+    const live: any[] = []
+    const finished: any[] = []
+
+    ;(data || []).forEach(
+      (auction) => {
+
+        const start =
+          new Date(
+            auction.start_time
+          )
+
+        const end =
+          new Date(
+            auction.end_time
+          )
+
+        if (now < start) {
+
+          upcoming.push(
+            auction
+          )
+
+        } else if (
+          now >= start &&
+          now < end
+        ) {
+
+          live.push(
+            auction
+          )
+
+        } else {
+
+          finished.push(
+            auction
+          )
+
+        }
+
+      }
+    )
+
+    setUpcomingAuctions(
+      upcoming
+    )
+
+    setLiveAuctions(
+      live
+    )
+
+    setFinishedAuctions(
+      finished
+    )
+
+  } catch (err) {
+
+    console.error(err)
+
+  } finally {
+
+    setLoading(false)
+
   }
+
+}
 
   const handleEnterAuction = (
     auctionId: string
@@ -313,6 +355,74 @@ export default function LiveAuctionsPage() {
               )}
 
             </section>
+
+            {/* DIVIDER */}
+
+<div className="relative my-20">
+
+  <div className="h-px w-full bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-70" />
+
+  <div className="absolute inset-0 blur-md bg-gradient-to-r from-transparent via-orange-500/40 to-transparent" />
+
+</div>
+
+{/* FINISHED */}
+
+<section>
+
+  <div className="flex items-center gap-3 mb-8">
+
+    <div className="w-3 h-3 rounded-full bg-zinc-500" />
+
+    <h2 className="text-3xl font-black">
+
+      Finished Auctions
+
+    </h2>
+
+  </div>
+
+  {finishedAuctions.length === 0 ? (
+
+    <div className="border border-zinc-800 bg-zinc-900/60 rounded-[32px] p-14 text-center">
+
+      <h3 className="text-2xl font-black mb-3">
+
+        No Finished Auctions
+
+      </h3>
+
+      <p className="text-zinc-500">
+
+        Completed auctions will appear here.
+
+      </p>
+
+    </div>
+
+  ) : (
+
+    <div className="grid grid-cols-1 gap-8">
+
+      {finishedAuctions.map(
+        (auction) => (
+
+          <LiveAuctionCard
+            key={auction.id}
+            auction={{
+              ...auction,
+              is_live: false,
+            }}
+          />
+
+        )
+      )}
+
+    </div>
+
+  )}
+
+</section>
 
           </>
 

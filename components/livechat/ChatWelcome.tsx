@@ -14,9 +14,6 @@ export default function ChatWelcome({
 
       <div className="mx-auto max-w-sm rounded-3xl border border-orange-500/30 bg-zinc-950 p-5 text-center shadow-[0_0_40px_rgba(249,115,22,0.15)]">
 
-        <div className="mb-4 text-5xl">
-          👑
-        </div>
 
         <h2 className="text-xl font-black text-white">
           Welcome to Precision Auctions
