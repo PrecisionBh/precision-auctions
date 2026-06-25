@@ -4,8 +4,9 @@ import {
   createClient,
 } from "https://esm.sh/@supabase/supabase-js@2"
 
-serve(async () => {
 
+serve(async () => {
+console.log("AUTO BID FUNCTION STARTED")
   const supabase =
     createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -108,21 +109,144 @@ if (
     }
 
     const nextBidder =
-      team.current_winner ===
-      leader.bidder_id
-        ? challenger
-        : leader
+  team.current_winner ===
+  leader.bidder_id
+    ? challenger
+    : leader
 
-    const nextAmount =
-      Number(team.current_bid) +
-      MIN_INCREMENT
+console.log(
+  "NEXT BIDDER",
+  {
+    bidderId:
+      nextBidder.bidder_id,
+    maxAmount:
+      nextBidder.max_amount,
+    notified:
+      nextBidder.max_reached_notified,
+  }
+)
 
-    if (
-      Number(nextBidder.max_amount) <
-      nextAmount
-    ) {
-      continue
+const nextAmount =
+  Number(team.current_bid) +
+  MIN_INCREMENT
+
+console.log(
+  "NEXT AMOUNT",
+  nextAmount
+)
+
+  console.log(
+  "CHECKING MAX REACHED",
+  {
+    maxAmount:
+      Number(
+        nextBidder.max_amount
+      ),
+    nextAmount,
+    result:
+      Number(
+        nextBidder.max_amount
+      ) < nextAmount,
+  }
+)
+
+if (
+  Number(nextBidder.max_amount) <
+  nextAmount
+) {
+
+  console.log(
+    "MAX BID REACHED BLOCK HIT"
+  )
+
+  console.log(
+  "FLAG VALUE",
+  nextBidder.max_reached_notified
+)
+
+  if (
+  !nextBidder.max_reached_notified
+) {
+
+  console.log(
+    "MAX BID EMAIL ELIGIBLE"
+  )
+
+    const {
+  data: profile,
+} = await supabase
+  .from("profiles")
+  .select("email")
+  .eq(
+    "id",
+    nextBidder.bidder_id
+  )
+  .single()
+
+console.log(
+  "PROFILE LOOKUP",
+  profile
+)
+
+    await supabase
+      .from("notifications")
+      .insert({
+        user_id:
+          nextBidder.bidder_id,
+        auction_id:
+          auctionId,
+        team_id:
+          team.id,
+        type:
+          "max_bid_reached",
+      })
+
+    if (profile?.email) {
+      console.log("CALLING MAX BID EMAIL")
+
+      await fetch(
+  "https://auctions.precisioncues.com/api/send-maxbid-email",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            email:
+              profile.email,
+            teamName:
+              `${team.player1_name} / ${team.player2_name}`,
+            maxBid:
+              nextBidder.max_amount,
+            currentBid:
+              team.current_bid,
+            auctionName:
+              "Precision Auction",
+            auctionUrl:
+              `https://auctions.precisioncues.com/liveauctions/${auctionId}`,
+          }),
+        }
+      )
+
     }
+
+    await supabase
+      .from("max_bids")
+      .update({
+        max_reached_notified:
+          true,
+      })
+      .eq(
+        "id",
+        nextBidder.id
+      )
+
+  }
+
+  continue
+
+}
 
     await supabase
       .from("bids")
@@ -163,6 +287,68 @@ if (
           nextBidder.bidder_id,
       })
       .eq("id", team.id)
+
+      const previousWinner =
+  team.current_winner
+
+if (
+  previousWinner &&
+  previousWinner !==
+    nextBidder.bidder_id
+) {
+
+  const {
+    data: profile,
+  } = await supabase
+    .from("profiles")
+    .select("email")
+    .eq(
+      "id",
+      previousWinner
+    )
+    .single()
+
+  await supabase
+    .from("notifications")
+    .insert({
+      user_id:
+        previousWinner,
+      auction_id:
+        auctionId,
+      team_id:
+        team.id,
+      type:
+        "outbid",
+    })
+
+  if (profile?.email) {
+
+    await fetch(
+      "https://auctions.precisioncues.com/api/send-outbid-email",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          email:
+            profile.email,
+          teamName:
+            `${team.player1_name} / ${team.player2_name}`,
+          bidAmount:
+            nextAmount,
+          auctionName:
+            "Precision Auction",
+          auctionUrl:
+            `https://auctions.precisioncues.com/liveauctions/${auctionId}`,
+        }),
+      }
+    )
+
+  }
+
+}
 
     console.log(
       "AUTO BID",

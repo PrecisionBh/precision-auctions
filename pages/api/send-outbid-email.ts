@@ -42,12 +42,16 @@ export default async function handler(
       success: true,
     })
 
-  } catch (error) {
+    } catch (error: any) {
 
-    console.error(error)
+    console.error(
+      "SEND OUTBID EMAIL ERROR:",
+      error
+    )
 
     return res.status(500).json({
       success: false,
+      error: error?.message || String(error),
     })
 
   }

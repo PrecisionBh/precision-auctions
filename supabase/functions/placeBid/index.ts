@@ -537,7 +537,7 @@ if (
         })
 
       await fetch(
-        "https://auctions.precisioncues.com/api/send-max-bid-reached-email",
+  "https://auctions.precisioncues.com/api/send-maxbid-email",
         {
           method: "POST",
           headers: {
@@ -545,20 +545,13 @@ if (
               "application/json",
           },
           body: JSON.stringify({
-            email:
-              profile.email,
-            teamName:
-              `${team.player1_name} / ${team.player2_name}`,
-            maxBid:
-              nextBidder.max_amount,
-            currentBid:
-              liveAmount,
-            auctionName:
-              auction?.name ||
-              "Precision Auction",
-            auctionUrl:
-              `https://auctions.precisioncues.com/liveauctions/${auctionId}`,
-          }),
+  to: profile.email,
+  email: profile.email,
+  teamName: `${team.player1_name} / ${team.player2_name}`,
+  bidAmount: liveAmount,
+  auctionName: auction?.name || "Precision Auction",
+  auctionUrl: `https://auctions.precisioncues.com/liveauctions/${auctionId}`,
+}),
         }
       )
 
@@ -628,18 +621,13 @@ if (
               "application/json",
           },
           body: JSON.stringify({
-            email:
-              profile.email,
-            teamName:
-              `${team.player1_name} / ${team.player2_name}`,
-            bidAmount:
-              liveAmount,
-            auctionName:
-              auction?.name ||
-              "Precision Auction",
-            auctionUrl:
-              `https://auctions.precisioncues.com/liveauctions/${auctionId}`,
-          }),
+  to: profile.email,
+  email: profile.email,
+  teamName: `${team.player1_name} / ${team.player2_name}`,
+  bidAmount: liveAmount,
+  auctionName: auction?.name || "Precision Auction",
+  auctionUrl: `https://auctions.precisioncues.com/liveauctions/${auctionId}`,
+}),
         }
       )
 
@@ -648,11 +636,31 @@ if (
   emailResponse.status
 )
 
-      console.log(
-        "OUTBID EMAIL SENT"
-      )
+const emailResponseText =
+  await emailResponse.text()
 
-    }
+console.log(
+  "EMAIL RESPONSE",
+  emailResponseText
+)
+
+if (!emailResponse.ok) {
+
+  console.error(
+    "OUTBID EMAIL FAILED",
+    emailResponseText
+  )
+
+} else {
+
+  console.log(
+    "OUTBID EMAIL SENT"
+  )
+
+}
+
+
+}
 
   } catch (emailError) {
 
